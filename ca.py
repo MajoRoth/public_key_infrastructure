@@ -1,0 +1,4 @@
+
+
+class CA:
+    pass
