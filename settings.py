@@ -1,3 +1,3 @@
 import math
 
-g = 1
+g = 2
