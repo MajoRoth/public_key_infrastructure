@@ -4,7 +4,6 @@ from cryptography.hazmat.primitives.asymmetric import padding
 
 import math
 
-from settings import g
 from ca.certificate import Certificate
 
 class Validator:
@@ -13,10 +12,10 @@ class Validator:
         pass
 
     @staticmethod
-    def validate(public_key: rsa.RSAPublicKey, certificate: Certificate, signature):
+    def validate(public_key: rsa.RSAPublicKey, certificate: Certificate):
         return public_key.verify(
-            signature,
-            bytes(str(certificate), 'utf-8'),
+            certificate.get_signature(),
+            certificate.encode(),
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
                 salt_length=padding.PSS.MAX_LENGTH),

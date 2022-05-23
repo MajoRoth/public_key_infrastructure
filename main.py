@@ -1,10 +1,7 @@
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
 
-from ca.certificate import Certificate
 from ca.ca import CA
-from validators import Validator
+from validator.validators import Validator
 
 
 
@@ -13,10 +10,11 @@ if __name__ == '__main__':
         public_exponent=65537,
         key_size=2048
     )
-    rsa_pk = rsa_sk.public_key()
-    cert = Certificate("google", rsa_pk, "root_ca", "01.01.2020", "01.01.2023")
-    print(cert)
+
     ca = CA("root_ca", rsa_sk)
+    cert1 = ca.generate_certificate("google", 1)
+    cert2 = ca.generate_certificate("microsoft", 2)
+    print(cert)
     signa = ca.sign(cert)
     print(signa)
-    print(Validator.validate(rsa_pk, cert, signa))
+    print(Validator.validate(ca.get_public_key(), cert))

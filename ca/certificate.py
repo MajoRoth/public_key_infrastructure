@@ -17,7 +17,19 @@ class Certificate:
                "validity_date_from: {validity_date_from}\n" \
                "validity_date_to: {validity_date_to}\n" \
                "public_key: {public_key}\n" \
+               "signer_signature: {signer_signature}\n" \
                "is_ca: {is_ca}\n".format(
+                name=self.name,
+                signer_name=self.signer_name,
+                validity_date_from=self.validity_date_from,
+                validity_date_to=self.validity_date_to,
+                public_key=self.public_key,
+                signer_signature=self.signer_signature,
+                is_ca=self.is_ca
+        )
+
+    def encode(self):
+        str_output = "{name}{signer_name}{validity_date_from}{validity_date_to}{public_key}{is_ca}".format(
             name=self.name,
             signer_name=self.signer_name,
             validity_date_from=self.validity_date_from,
@@ -26,7 +38,12 @@ class Certificate:
             signer_signature=self.signer_signature,
             is_ca=self.is_ca
         )
+        return bytes(str_output, 'utf-8')
 
+    def get_signature(self):
+        if self.signer_signature is None:
+            raise "cert does not signed"
+        return self.signer_signature
 
 
 
