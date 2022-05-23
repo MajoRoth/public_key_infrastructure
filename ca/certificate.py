@@ -17,7 +17,6 @@ class Certificate:
                "validity_date_from: {validity_date_from}\n" \
                "validity_date_to: {validity_date_to}\n" \
                "public_key: {public_key}\n" \
-               "signer_signature: {signer_signature}\n" \
                "is_ca: {is_ca}\n".format(
             name=self.name,
             signer_name=self.signer_name,

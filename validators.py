@@ -12,6 +12,7 @@ class Validator:
     def __init__(self):
         pass
 
+    @staticmethod
     def validate(public_key: rsa.RSAPublicKey, certificate: Certificate, signature):
         return public_key.verify(
             signature,
