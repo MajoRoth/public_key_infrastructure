@@ -11,6 +11,7 @@ class Entity:
         self.sk = sk
         self.pk = sk.public_key()
         self.certificate = certificate
+        self.ca = None
 
     """
     Schnorr signatures
@@ -25,5 +26,14 @@ class Entity:
         )
         return signature
 
-    def request_cert(self, ca: CA):
-        self.certificate = ca.generate_certificate(self.name, self.pk)
+    def request_cert(self, ca: CA, is_ca=False):
+        if type(ca) == Entity:
+            if ca.ca is None:
+                raise "entity is not a ca"
+            ca = ca.ca
+        self.certificate = ca.generate_certificate(self.name, self.pk, is_ca=is_ca)
+        if is_ca:
+            self.ca = CA(self.name, self.sk)
+
+        ca.sign(self.certificate)
+        print(self.certificate)

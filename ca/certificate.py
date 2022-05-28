@@ -2,10 +2,11 @@
 
 class Certificate:
 
-    def __init__(self, name, public_key, signer_name, validity_date_from, validity_date_to, signer_signature=None, is_ca=False):
+    def __init__(self, name, public_key, signer, validity_date_from, validity_date_to, signer_signature=None, is_ca=False):
         self.name = name
         self.public_key = public_key
-        self.signer_name = signer_name
+        self.signer = signer
+        self.signer_name = signer.name
         self.signer_signature = signer_signature
         self.validity_date_from = validity_date_from
         self.validity_date_to = validity_date_to
@@ -44,6 +45,9 @@ class Certificate:
         if self.signer_signature is None:
             raise "cert does not signed"
         return self.signer_signature
+
+    def get_signer_name(self):
+        return self.signer_name
 
 
 

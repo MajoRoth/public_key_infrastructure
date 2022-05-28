@@ -13,17 +13,17 @@ class CA:
         self.name = name
         self.sk = sk
         self.pk = sk.public_key()
+        self.revocation_list = list()  # list of invalid certs
 
-    def generate_certificate(self, name, public_key):
+    def generate_certificate(self, name, public_key, is_ca=False):
         date_from = date.today()
         date_to = date.today()
         date_to = date_to.replace(year=date_from.year + 1)
-        cert = Certificate(name=name, public_key=public_key, signer_name=self.name,
-                           validity_date_from=date_from, validity_date_to=date_to)
+        cert = Certificate(name=name, public_key=public_key, signer=self,
+                           validity_date_from=date_from, validity_date_to=date_to, is_ca=is_ca)
         return cert
 
     def sign(self, certificate: Certificate):
-        print(certificate)
         signature = self.sk.sign(
             certificate.encode(),
             padding.PSS(
@@ -36,6 +36,12 @@ class CA:
 
     def get_public_key(self):
         return self.pk
+
+    def revocate(self, certificate: Certificate):
+        self.revocation_list.append(certificate)
+
+    def check_if_revocated(self, certificate: Certificate):
+        return certificate in self.revocation_list
 
 
 
