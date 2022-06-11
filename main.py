@@ -1,8 +1,6 @@
-from cryptography.hazmat.primitives.asymmetric import rsa
-import socket
 import pickle
 
-import settings
+from utils import settings
 
 
 def establish_connection():

@@ -3,11 +3,10 @@ import socket
 import re
 import sys
 
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from validator import Validator
-import settings
+from utils import settings
 from utils.logs import log
 
 from _thread import *

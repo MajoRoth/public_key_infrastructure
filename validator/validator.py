@@ -4,15 +4,12 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from datetime import date
-import math
 import socket
-
-import ca.ca
-import entity.entity
-import settings
-from ca.certificate import Certificate
-from ca.ca import CA
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
+
+from utils import settings
+from ca.certificate import Certificate
+from utils.logs import log
 
 
 
@@ -51,14 +48,13 @@ class Validator:
         if self.is_ca(certificate.signers_entity_address, certificate.signers_entity_port):
             soc = socket.socket()
 
-            print('Waiting for connectionn')
+            log("waiting for connection", settings.Log.Results)
 
             try:
                 soc.connect((certificate.signers_entity_address, int(certificate.signers_entity_port)))
             except socket.error as e:
-                print(str(e))
-            print(soc.recv(settings.RECEIVE_BYTES))
-            print("get here")
+                log("{}".format(e), settings.Log.Errors)
+            soc.recv(settings.RECEIVE_BYTES)
 
             soc.send(str.encode("pk"))
 
@@ -77,9 +73,7 @@ class Validator:
             except Exception:
                 return False
 
-            if settings.LOG.value >= settings.Log.Results.value:
-                print("{}Results: pk verified {}".format('\033[92m', '\033[0m'))
-
+            log("pk verified", settings.Log.Results)
 
             if self.revocated(certificate):
                 return False
@@ -87,7 +81,6 @@ class Validator:
             if certificate.validity_date_to < date.today():
                 return False
 
-            print("Passed all")
             return True
 
         return False
@@ -107,45 +100,39 @@ class Validator:
     def is_ca(self, address, port):
         soc = socket.socket()
 
-        print('Waiting for connection')
+        log("waiting for connection", settings.Log.Results)
         try:
             soc.connect((address, int(port)))
         except socket.error as e:
-            print(str(e))
+            log("{}".format(e), settings.Log.Errors)
 
-        print(soc.recv(settings.RECEIVE_BYTES))
+        soc.recv(settings.RECEIVE_BYTES)
 
-        print((address, int(port)) in self.root_ca_dict)
         if (address, int(port)) in self.root_ca_dict:
             return True
 
         soc.send(str.encode("get_cert"))
         cert = soc.recv(settings.RECEIVE_BYTES)
         cert = pickle.loads(cert)
-        print(cert)
         if cert == settings.BAD:
             return False
 
-
         signer_soc = socket.socket()
+
         try:
             signer_soc.connect((cert.signers_entity_address, int(cert.signers_entity_port)))
         except socket.error as e:
-            print(str(e))
+            log("{}".format(e), settings.Log.Errors)
 
-        print(signer_soc.recv(settings.RECEIVE_BYTES))
+        signer_soc.recv(settings.RECEIVE_BYTES)
         signer_soc.send(str.encode("pk"))
-
         pk_data = signer_soc.recv(settings.RECEIVE_BYTES)
         pk = load_pem_public_key(pk_data)
-
 
         if cert.is_ca and self.passive_validate(cert, pk):
             return self.is_ca(cert.signers_entity_address, int(cert.signers_entity_port))
 
-        print("NOT A CA - RETURNED FALSE")
         return False
-
 
     def revocated(self, certificate: Certificate):
         soc = socket.socket()
@@ -153,22 +140,16 @@ class Validator:
         try:
             soc.connect((certificate.signers_entity_address, int(certificate.signers_entity_port)))
         except socket.error as e:
-            print(str(e))
-        print(soc.recv(settings.RECEIVE_BYTES))
+            log("{}".format(e), settings.Log.Errors)
+        soc.recv(settings.RECEIVE_BYTES)
 
-        print("REVOCATING")
         soc.send(str.encode("check_if_revocated"))
         soc.recv(settings.RECEIVE_BYTES)
         soc.send(pickle.dumps(certificate))
-        print("REVOCATING")
 
         answer = soc.recv(settings.RECEIVE_BYTES)
-        print(answer)
-        print(answer==settings.OK)
         if answer == settings.OK:
             return True
-
-        print("wew")
 
         soc.send(str.encode("is_root_ca"))
         if soc.recv(settings.RECEIVE_BYTES) == settings.OK:

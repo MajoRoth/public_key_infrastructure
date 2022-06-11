@@ -1,5 +1,4 @@
 
-
 class Certificate:
 
     def __init__(self, name, public_key, signer_name, validity_date_from, validity_date_to,

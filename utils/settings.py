@@ -15,7 +15,7 @@ class Log(Enum):
     Debug = 4
 
 
-LOG = Log.Warnings
+LOG = Log.Debug
 
 
 ROOT_PORT = 5401

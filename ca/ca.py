@@ -5,6 +5,8 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from datetime import date
 
 from ca.certificate import Certificate
+from utils.logs import log
+from utils import settings
 
 
 class CA:
@@ -57,7 +59,7 @@ class CA:
                 new_list.append(cert)
 
         self.revocation_list = new_list
-        print(self.revocation_list)
+        log("{}".format(self.revocation_list), settings.LOG.Debug)
 
 
 

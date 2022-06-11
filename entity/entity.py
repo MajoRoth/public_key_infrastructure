@@ -1,14 +1,13 @@
-import pickle
 import socket
 
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 
 
 from ca.ca import CA
-import settings
+from utils import settings
+from utils.logs import log
 
 
 class Entity:
@@ -35,22 +34,19 @@ class Entity:
         return signature
 
     def request_cert(self, ca_address, ca_port, pk, is_ca=False):
-        print("REQUEST CERT")
-
         soc = socket.socket()
 
-        print('Waiting for connection')
+        log("waiting for connection", settings.Log.Results)
         try:
             soc.connect((ca_address, int(ca_port)))
         except socket.error as e:
-            print(str(e))
+            log("{}".format(e), settings.Log.Errors)
 
-        print(soc.recv(1024))
+        soc.recv(1024)
 
 
         soc.send(bytes("is_ca ", settings.FORMAT))
         is_signer_ca = soc.recv(settings.RECEIVE_BYTES)
-        print("IS_CA {}".format(is_ca))
         if is_signer_ca == settings.BAD:
             raise self.NotCaError()
 
@@ -61,17 +57,10 @@ class Entity:
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
-        print(serialized_pk)
-
 
         soc.send(bytes("generate_cert {} {} {} {} {}".format(self.name, serialized_pk, ca_address, ca_port, is_ca), settings.FORMAT))
         pickled_cert = soc.recv(settings.RECEIVE_BYTES)
         return pickled_cert
-        # self.certificate = ca_entity.ca.generate_certificate(self.name, self.pk, ca_entity, is_ca=is_ca)
-        # if is_ca:
-        #     self.ca = CA(self.name, self.sk)
-        #
-        # ca_entity.ca.sign(self.certificate)
 
     def make_root_ca(self):
         self.root_ca = True

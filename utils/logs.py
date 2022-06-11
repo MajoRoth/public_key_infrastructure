@@ -1,4 +1,4 @@
-import settings
+from utils import settings
 
 
 def log(message, priority: settings.LOG):
