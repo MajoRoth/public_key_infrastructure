@@ -2,15 +2,17 @@
 
 class Certificate:
 
-    def __init__(self, name, public_key, signer, validity_date_from, validity_date_to, signer_signature=None, is_ca=False):
+    def __init__(self, name, public_key, signer_name, validity_date_from, validity_date_to,
+                 signers_entity_address, signers_entity_port, signer_signature=None, is_ca=False):
         self.name = name
         self.public_key = public_key
-        self.signer = signer
-        self.signer_name = signer.name
+        self.signer_name = signer_name
         self.signer_signature = signer_signature
         self.validity_date_from = validity_date_from
         self.validity_date_to = validity_date_to
         self.is_ca = is_ca
+        self.signers_entity_address = signers_entity_address
+        self.signers_entity_port = signers_entity_port
 
     def __str__(self):
         return "name: {name}\n" \
@@ -28,6 +30,15 @@ class Certificate:
                 signer_signature=self.signer_signature,
                 is_ca=self.is_ca
         )
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        return (self.name == other.name and self.signer_name == other.signer_name
+                and self.public_key == other.public_key and self.signer_signature == other.signer_signature
+                and self.validity_date_from == other.validity_date_from and self.validity_date_to == other.validity_date_to)
+
+
 
     def encode(self):
         str_output = "{name}{signer_name}{validity_date_from}{validity_date_to}{public_key}{is_ca}".format(
